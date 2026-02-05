@@ -587,3 +587,31 @@
             font-size: 13px;
         }
     }
+    /* Tema rosa */
+
+body{
+    background:linear-gradient(135deg,#ffd1ec,#ffe6f5);
+}
+
+.menu a{
+    background:#ff4da6;
+    color:white;
+    padding:8px 12px;
+    margin:4px;
+    border-radius:20px;
+    text-decoration:none;
+    transition:0.3s;
+}
+
+.menu a:hover{
+    background:#ff1a8c;
+    transform:scale(1.05);
+}
+
+button{
+    background:#ff4da6;
+    color:white;
+    border:none;
+    padding:8px 15px;
+    border-radius:20px;
+}
