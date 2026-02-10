@@ -1,0 +1,139 @@
+/* Reinicio básico */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; /* Evita desplazamiento horizontal innecesario */
+    background-color: black;
+}
+
+/* Fondo animado fijo */
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at bottom, #E8CBC0 0%, #636FA4 100%);
+    z-index: -1; /* Se mantiene detrás de todo */
+    overflow: hidden;
+}
+
+/* Centrado perfecto para Android Studio/Móvil */
+.forms-container {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center;     /* Centra verticalmente */
+    min-height: 100vh;       /* Asegura que ocupe todo el alto de pantalla */
+    width: 100%;
+    padding: 20px;           /* Espacio para que no toque los bordes en móvil */
+    box-sizing: border-box;
+}
+
+/* Ajustes del formulario para que sea flexible */
+.form {
+    width: 100%;
+    max-width: 350px;        /* Tamaño máximo para que no se vea gigante */
+    z-index: 10;
+    /* Mantén tus otros estilos de .form aquí (colores, bordes, etc.) */
+}
+.login-box {
+    position: relative;
+    width: 350px;
+    padding: 40px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(5px);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    color: white;
+    animation: aparecer 1s ease;
+}
+
+@keyframes aparecer {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.login-box h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Inputs */
+.input-box {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 10px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid white;
+    outline: none;
+    color: white;
+    font-size: 16px;
+}
+
+.input-box label {
+    position: absolute;
+    left: 0;
+    top: 10px;
+    pointer-events: none;
+    transition: 0.4s;
+    opacity: 0.7;
+}
+
+.input-box input:focus ~ label,
+.input-box input:valid ~ label {
+    top: -12px;
+    font-size: 12px;
+    opacity: 1;
+}
+
+/* Checkbox */
+.options {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+/* Botón principal */
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    background: white;
+    color: #2575fc;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px white;
+}
+
+/* Botones secundarios */
+.extra {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.extra a {
+    color: white;
+    font-size: 13px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.extra a:hover {
+    text-decoration: underline;
+    color: #ffeaa7;
+}
