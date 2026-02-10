@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+     <div class="login-box">
+    <h2>Iniciar Sesión</h2>
+
+    <form>
+        <div class="input-box">
+            <input type="text" required>
+            <label>Nombre de usuario</label>
+        </div>
+
+        <div class="input-box">
+            <input type="password" required>
+            <label>Contraseña</label>
+        </div>
+
+        <div class="options">
+            <label>
+                <input type="checkbox"> Recordarme
+            </label>
+        </div>
+
+        <button type="submit">Entrar</button>
+
+        <div class="extra">
+            <a href="#">Crear cuenta</a>
+            <a href="#">Cambiar contraseña</a>
+        </div>
+    </form>
+</div>
+</body>
+</html>
