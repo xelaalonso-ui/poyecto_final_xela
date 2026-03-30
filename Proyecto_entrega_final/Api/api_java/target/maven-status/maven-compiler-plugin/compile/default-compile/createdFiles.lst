@@ -1,0 +1,9 @@
+redsocial\Conexion.class
+redsocial\ComentariosResource.class
+redsocial\DatosPersonalesResource.class
+redsocial\LoginResource.class
+redsocial\UsuariosResource.class
+redsocial\ErrorMapper.class
+redsocial\FotosResource.class
+redsocial\ActividadResource.class
+redsocial\CorsFilter.class
