@@ -9,16 +9,22 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.Map;
 
+
+
 @Provider
-class CorsFilter implements ContainerResponseFilter {
+public class ErrorMapper implements ExceptionMapper<Exception> {
     @Override
-    public void filter(ContainerRequestContext req, ContainerResponseContext res) throws IOException {
-        res.getHeaders().add("Access-Control-Allow-Origin",  "*");
-        res.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        res.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    public Response toResponse(Exception e) {
+        String mensaje = e.getMessage() != null ? e.getMessage() : "Error interno";
+        String json = "{\"error\":\"" + mensaje + "\"}";
+        return Response.status(Status.INTERNAL_SERVER_ERROR)
+                       .entity(json)
+                       .header("Access-Control-Allow-Origin", "*")
+                       .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                       .header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                       .build();
     }
 }
-
 @Provider
 class ErrorMapper implements ExceptionMapper<Exception> {
     @Override
