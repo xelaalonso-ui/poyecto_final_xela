@@ -1,26 +1,26 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['id'])) { header('Location: index.php'); exit; }
+// ── Seguridad: solo usuarios logueados
+if (!isset($_SESSION['id'])) {
+    header('Location: index.php');
+    exit;
+}
 
 $id_usuario = $_SESSION['id'];
 $msg_ok = $msg_err = '';
 
-// URL base de la API - ajusta el host/ruta según tu servidor
+// ── URL base de la API
 define('API_BASE', 'http://localhost/RedSocial/api/api.php');
 
-/**
- * Helper cURL para llamar a la API REST
- */
+// ── Función para llamar a la API
 function llamarAPI(string $endpoint, string $metodo = 'GET', array $datos = []): array {
     $url = API_BASE . '/' . ltrim($endpoint, '/');
-    $ch  = curl_init($url);
+    $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST,  $metodo);
-    curl_setopt($ch, CURLOPT_HTTPHEADER,     ['Content-Type: application/json']);
-    if (!empty($datos)) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datos));
-    }
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $metodo);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    if (!empty($datos)) curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datos));
     $respuesta = curl_exec($ch);
     $httpCode  = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -29,10 +29,10 @@ function llamarAPI(string $endpoint, string $metodo = 'GET', array $datos = []):
     return $json;
 }
 
-// ── CREAR publicación → POST /fotos ─────────────────────────
+// ── CREAR publicación
 if (isset($_POST['publicar'])) {
     $texto = trim($_POST['texto'] ?? '');
-    if (!empty($texto)) {
+    if ($texto !== '') {
         $resp = llamarAPI('fotos', 'POST', [
             'id_usuario'  => $id_usuario,
             'url_foto'    => '',
@@ -40,28 +40,28 @@ if (isset($_POST['publicar'])) {
             'tipo_foto'   => 'publicacion'
         ]);
         if ($resp['__http_code'] === 201) {
-            $msg_ok = '¡Publicación creada! (API: POST /fotos → 201 Created)';
+            $msg_ok = '🎉 ¡Tu publicación se ha creado con éxito!';
         } else {
-            $msg_err = 'Error API: ' . ($resp['error'] ?? 'desconocido');
+            $msg_err = '⚠️ Ups, algo salió mal: ' . ($resp['error'] ?? 'desconocido');
         }
     } else {
-        $msg_err = 'El texto no puede estar vacío.';
+        $msg_err = '⚠️ No puedes dejar el texto vacío. 💬';
     }
 }
 
-// ── ELIMINAR publicación → DELETE /fotos/{id} ───────────────
+// ── ELIMINAR publicación
 if (isset($_POST['eliminar']) && !empty($_POST['id_foto'])) {
     $id_foto = (int)$_POST['id_foto'];
     $resp = llamarAPI('fotos/' . $id_foto, 'DELETE');
     if ($resp['__http_code'] === 200) {
-        $msg_ok = '¡Publicación eliminada! (API: DELETE /fotos/' . $id_foto . ' → 200 OK)';
+        $msg_ok = '🗑️ Publicación eliminada.';
     } else {
-        $msg_err = 'Error API: ' . ($resp['error'] ?? 'desconocido');
+        $msg_err = '⚠️ No se pudo eliminar: ' . ($resp['error'] ?? 'desconocido');
     }
 }
 
-// ── MOSTRAR publicaciones → GET /fotos ──────────────────────
-$resp        = llamarAPI('fotos', 'GET');
+// ── MOSTRAR publicaciones
+$resp = llamarAPI('fotos', 'GET');
 $todas_fotos = $resp['fotos'] ?? [];
 $publicaciones = array_values(array_filter($todas_fotos, fn($f) => $f['tipo_foto'] === 'publicacion'));
 ?>
@@ -74,6 +74,7 @@ $publicaciones = array_values(array_filter($todas_fotos, fn($f) => $f['tipo_foto
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
+    /* Estilos de publicaciones y cajas */
     .publish-box {
       background:white; border-radius:20px; padding:24px;
       box-shadow:0 8px 32px rgba(139,92,246,0.15);
@@ -122,10 +123,16 @@ $publicaciones = array_values(array_filter($todas_fotos, fn($f) => $f['tipo_foto
 <div class="main-container">
   <h1 class="section-title">📰 Publicaciones <span class="api-badge">⚡ API REST</span></h1>
 
-  <?php if ($msg_ok): ?><div class="alert alert-success">🎉 <?= htmlspecialchars($msg_ok) ?></div><?php endif; ?>
-  <?php if ($msg_err): ?><div class="alert alert-error">⚠️ <?= htmlspecialchars($msg_err) ?></div><?php endif; ?>
+  <?php
+  if ($msg_ok) { 
+    echo '<div class="alert alert-success">' . htmlspecialchars($msg_ok) . '</div>'; 
+    }
+  if ($msg_err) { 
+    echo '<div class="alert alert-error">' . htmlspecialchars($msg_err) . '</div>'; 
+    }
+  ?>
 
-  <!-- CREAR → llama POST /fotos a través de la API -->
+  <!-- CREAR publicación -->
   <div class="publish-box">
     <h3 style="margin-bottom:14px;color:#5b21b6;">
       <i class="fa-solid fa-pen-to-square"></i> Nueva publicación
@@ -141,61 +148,52 @@ $publicaciones = array_values(array_filter($todas_fotos, fn($f) => $f['tipo_foto
     </form>
   </div>
 
-  <!-- MOSTRAR → resultado de GET /fotos -->
-  <?php if (!empty($publicaciones)): $i = 0; ?>
-    <?php foreach ($publicaciones as $row): $i++; ?>
-      <div class="post-card" style="animation-delay:<?= $i * 0.07 ?>s">
-        <div class="post-header">
-          <div class="avatar-ph"><?= strtoupper(substr($row['username'] ?? '?', 0, 1)) ?></div>
-          <div>
-            <div class="post-autor">@<?= htmlspecialchars($row['username'] ?? 'usuario') ?></div>
-          </div>
-        </div>
-        <div class="post-body"><?= nl2br(htmlspecialchars($row['descripcion'])) ?></div>
-        <div class="post-footer">
-          <div class="post-date">
-            <i class="fa-regular fa-clock"></i>
-            <?= isset($row['fecha_subida']) ? (new DateTime($row['fecha_subida']))->format('d/m/Y H:i') : '' ?>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;">
-            <button class="post-btn" onclick="like(this)">
-              <i class="fa-regular fa-heart"></i> Me gusta
-            </button>
-            <?php if ((int)$row['id_usuario'] === (int)$id_usuario): ?>
-              <!-- ELIMINAR → llama DELETE /fotos/{id} a través de la API -->
-              <form method="POST" style="display:inline;"
-                    onsubmit="return confirm('¿Eliminar esta publicación?');">
-                <input type="hidden" name="id_foto" value="<?= (int)$row['id_foto'] ?>">
-                <button type="submit" name="eliminar" class="post-btn" style="color:#ef4444;">
-                  <i class="fa-solid fa-trash"></i> Eliminar
-                </button>
-              </form>
-            <?php endif; ?>
-          </div>
-        </div>
-      </div>
-    <?php endforeach; ?>
-  <?php else: ?>
-    <div style="text-align:center;padding:60px;background:white;border-radius:20px;box-shadow:0 6px 24px rgba(139,92,246,0.1);">
-      <div style="font-size:4rem;margin-bottom:16px;">📭</div>
-      <p style="color:#6b7280;">Aún no hay publicaciones. ¡Sé el primero!</p>
-    </div>
-  <?php endif; ?>
+  <!-- MOSTRAR publicaciones -->
+  <?php
+  if (!empty($publicaciones)) {
+      $i = 0;
+      foreach ($publicaciones as $row) {
+          $i++;
+          echo '<div class="post-card" style="animation-delay:' . ($i * 0.07) . 's">';
+          echo '<div class="post-header">';
+          echo '<div class="avatar-ph">' . strtoupper(substr($row['username'] ?? '?',0,1)) . '</div>';
+          echo '<div><div class="post-autor">@' . htmlspecialchars($row['username'] ?? 'usuario') . '</div></div>';
+          echo '</div>';
+          echo '<div class="post-body">' . nl2br(htmlspecialchars($row['descripcion'])) . '</div>';
+          echo '<div class="post-footer">';
+          echo '<div class="post-date"><i class="fa-regular fa-clock"></i> ' . (isset($row['fecha_subida']) ? (new DateTime($row['fecha_subida']))->format('d/m/Y H:i') : '') . '</div>';
+          echo '<div style="display:flex;gap:8px;align-items:center;">';
+          echo '<button class="post-btn" onclick="like(this)"><i class="fa-regular fa-heart"></i> Me gusta</button>';
+          if ((int)$row['id_usuario'] === (int)$id_usuario) {
+              echo '<form method="POST" style="display:inline;" onsubmit="return confirm(\'¿Eliminar esta publicación?\');">';
+              echo '<input type="hidden" name="id_foto" value="' . (int)$row['id_foto'] . '">';
+              echo '<button type="submit" name="eliminar" class="post-btn" style="color:#ef4444;">';
+              echo '<i class="fa-solid fa-trash"></i> Eliminar</button></form>';
+          }
+          echo '</div></div></div>';
+      }
+  } else {
+      echo '<div style="text-align:center;padding:60px;background:white;border-radius:20px;box-shadow:0 6px 24px rgba(139,92,246,0.1);">';
+      echo '<div style="font-size:4rem;margin-bottom:16px;">📭</div>';
+      echo '<p style="color:#6b7280;">Aún no hay publicaciones. ¡Sé el primero!</p>';
+      echo '</div>';
+  }
+  ?>
 </div>
 
 <img src="img/koala.png" alt="🐨" class="panda-deco" title="¡Haz clic!">
 <script src="efectos.js"></script>
 <script>
 function like(btn) {
-  const i = btn.querySelector('i');
-  if (i.classList.contains('fa-regular')) {
-    i.classList.replace('fa-regular','fa-solid');
-    btn.style.color='#ec4899';
-    showToast('❤️ ¡Te gustó!','success');
-  } else {
-    i.classList.replace('fa-solid','fa-regular');
-    btn.style.color='';
-  }
+    const i = btn.querySelector('i');
+    if (i.classList.contains('fa-regular')) {
+        i.classList.replace('fa-regular','fa-solid');
+        btn.style.color='#ec4899';
+        showToast('❤️ ¡Te gustó!','success');
+    } else {
+        i.classList.replace('fa-solid','fa-regular');
+        btn.style.color='';
+    }
 }
 </script>
 </body>
