@@ -1,11 +1,9 @@
 package com.example.redsocial;
 
-import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -20,145 +18,139 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// Activity del formulario de Login
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText etUser, etPass;
-    private TextView btnLogin, tvError, tvGoRegister;
-    private ProgressBar progressBar;
-    private SessionManager session;
+    // Vistas del layout
+    private EditText campoUsuario, campoContrasena;
+    private TextView btnLogin, tvError, tvIrRegistro;
+    private ProgressBar barraProgreso;
+
+    // Gestor de sesion
+    private SessionManager sesion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        session = new SessionManager(this);
+        sesion = new SessionManager(this);
 
-        // Si ya está logueado, ir directamente al main
-        if (session.isLoggedIn()) {
-            goToMain();
+        // Si ya hay sesion activa, saltamos directamente al main
+        if (sesion.isLoggedIn()) {
+            irAlMain();
             return;
         }
 
-        etUser      = findViewById(R.id.et_user);
-        etPass      = findViewById(R.id.et_pass);
-        btnLogin    = findViewById(R.id.btn_login);
-        tvError     = findViewById(R.id.tv_error);
-        tvGoRegister= findViewById(R.id.tv_go_register);
-        progressBar = findViewById(R.id.progressBar);
+        // Inicializamos las vistas
+        campoUsuario    = findViewById(R.id.et_user);
+        campoContrasena = findViewById(R.id.et_pass);
+        btnLogin        = findViewById(R.id.btn_login);
+        tvError         = findViewById(R.id.tv_error);
+        tvIrRegistro    = findViewById(R.id.tv_go_register);
+        barraProgreso   = findViewById(R.id.progressBar);
 
-        // Animación entrada del card
-        View card = btnLogin.getRootView().findViewWithTag("login_card");
-        animateEntrance();
-
-        btnLogin.setOnClickListener(v -> {
-            // Animación de click
-            animateButtonClick(btnLogin);
-            doLogin();
+        // Click en el boton de login
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hacerLogin();
+            }
         });
 
-        tvGoRegister.setOnClickListener(v -> {
-            startActivity(new Intent(this, RegisterActivity.class));
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        // Click en "ir al registro"
+        tvIrRegistro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }
         });
     }
 
-    private void animateEntrance() {
-        View root = getWindow().getDecorView();
-        root.setAlpha(0f);
-        ObjectAnimator anim = ObjectAnimator.ofFloat(root, View.ALPHA, 0f, 1f);
-        anim.setDuration(500);
-        anim.setInterpolator(new DecelerateInterpolator());
-        anim.start();
-    }
+    // Metodo que realiza la peticion de login a la API
+    private void hacerLogin() {
+        String email    = campoUsuario.getText().toString().trim();
+        String password = campoContrasena.getText().toString().trim();
 
-    private void animateButtonClick(View v) {
-        ObjectAnimator scaleX = ObjectAnimator.ofFloat(v, View.SCALE_X, 1f, 0.95f, 1f);
-        ObjectAnimator scaleY = ObjectAnimator.ofFloat(v, View.SCALE_Y, 1f, 0.95f, 1f);
-        scaleX.setDuration(200);
-        scaleY.setDuration(200);
-        scaleX.start();
-        scaleY.start();
-    }
-
-    private void doLogin() {
-        String user = etUser.getText().toString().trim();
-        String pass = etPass.getText().toString().trim();
-
-        if (TextUtils.isEmpty(user) || TextUtils.isEmpty(pass)) {
-            showError("Por favor completa todos los campos");
-            shakeView(user.isEmpty() ? etUser : etPass);
+        // Comprobamos que los campos no esten vacios
+        if ( {
+            TextUtils.isEmpty(email) {
+        }
+            || TextUtils.isEmpty(password)) {
+        }
+            mostrarError("Por favor completa todos los campos");
             return;
         }
 
-        showLoading(true);
-        hideError();
+        // Mostramos la barra de carga
+        mostrarCargando(true);
+        ocultarError();
 
-        Map<String, String> body = new HashMap<>();
-        body.put("email", user);
-        body.put("password", pass);
+        // Creamos el mapa con los datos para enviar al servidor
+        Map<String, String> datosPeticion = new HashMap<>();
+        datosPeticion.put("email", email);
+        datosPeticion.put("password", password);
 
-        ApiClient.getService().login(body).enqueue(new Callback<LoginResponse>() {
+        // Llamada a la API
+        ApiClient.getService().login(datosPeticion).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                showLoading(false);
+                mostrarCargando(false);
 
-                if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse r = response.body();
-                    if (r.usuario != null) {
+                if ( {
+                    response.isSuccessful() {
+                }
+                    && response.body() != null) {
+                }
+                    LoginResponse respuesta = response.body();
 
-                        session.saveSession(
-                                r.usuario.idUsuario,
-                                r.usuario.username,
-                                r.usuario.email
+                    if (respuesta.usuario != null) {
+                        // Login correcto: guardamos la sesion
+                        sesion.guardarSesion(
+                                respuesta.usuario.idUsuario,
+                                respuesta.usuario.username,
+                                respuesta.usuario.email
                         );
-                        goToMain();
-                    } else if (r.error != null) {
-                        showError(r.error);
+                        irAlMain();
+                    } else if (respuesta.error != null) {
+                        mostrarError(respuesta.error);
                     } else {
-                        showError("Usuario o contraseña incorrectos");
+                        mostrarError("Usuario o contraseña incorrectos");
                     }
                 } else {
-                    showError("Error de servidor (" + response.code() + ")");
+                    mostrarError("Error del servidor: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                showLoading(false);
-                showError("Sin conexión con el servidor.\nVerifica la URL en ApiClient.java");
+                mostrarCargando(false);
+                mostrarError("No se pudo conectar con el servidor.\nRevisa la URL en ApiClient.java");
             }
         });
     }
 
-    private void shakeView(View v) {
-        ObjectAnimator shake = ObjectAnimator.ofFloat(v, View.TRANSLATION_X,
-                0f, 15f, -15f, 10f, -10f, 5f, -5f, 0f);
-        shake.setDuration(500);
-        shake.start();
-    }
-
-    private void showLoading(boolean show) {
-        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        btnLogin.setEnabled(!show);
-        btnLogin.setAlpha(show ? 0.6f : 1f);
-    }
-
-    private void showError(String msg) {
-        tvError.setText(msg);
-        tvError.setVisibility(View.VISIBLE);
-        ObjectAnimator anim = ObjectAnimator.ofFloat(tvError, View.ALPHA, 0f, 1f);
-        anim.setDuration(300);
-        anim.start();
-    }
-
-    private void hideError() {
-        tvError.setVisibility(View.GONE);
-    }
-
-    private void goToMain() {
+    // Navega a la pantalla principal
+    private void irAlMain() {
         startActivity(new Intent(this, MainActivity.class));
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         finish();
+    }
+
+    // Muestra u oculta la barra de progreso
+    private void mostrarCargando(boolean cargando) {
+        barraProgreso.setVisibility(cargando ? View.VISIBLE : View.GONE);
+        btnLogin.setEnabled(!cargando);
+        btnLogin.setAlpha(cargando ? 0.6f : 1f);
+    }
+
+    private void mostrarError(String mensaje) {
+        tvError.setText(mensaje);
+        tvError.setVisibility(View.VISIBLE);
+    }
+
+    private void ocultarError() {
+        tvError.setVisibility(View.GONE);
     }
 }

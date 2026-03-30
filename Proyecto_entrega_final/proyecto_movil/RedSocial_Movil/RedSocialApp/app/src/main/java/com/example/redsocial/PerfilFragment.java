@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -20,13 +19,18 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// Fragmento del perfil del usuario logueado
+// Muestra username, email, fecha de registro y numero de publicaciones
 public class PerfilFragment extends Fragment {
 
-    private SessionManager session;
-    private TextView tvUsername, tvEmail, tvInfoUsername, tvInfoEmail, tvInfoFecha;
-    private TextView tvTotalPubs, tvAvatarInitial;
-    private CircleImageView ivAvatar;
-    private ProgressBar progressBar;
+    private SessionManager sesion;
+
+    // Vistas del layout
+    private TextView tvNombreUsuario, tvEmail;
+    private TextView tvInfoUsername, tvInfoEmail, tvInfoFecha;
+    private TextView tvTotalPublicaciones, tvLetraAvatar;
+    private CircleImageView imagenAvatar;
+    private ProgressBar barraProgreso;
 
     @Nullable
     @Override
@@ -39,71 +43,98 @@ public class PerfilFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        session         = new SessionManager(requireContext());
-        tvUsername      = view.findViewById(R.id.tv_username);
-        tvEmail         = view.findViewById(R.id.tv_email);
-        tvInfoUsername  = view.findViewById(R.id.tv_info_username);
-        tvInfoEmail     = view.findViewById(R.id.tv_info_email);
-        tvInfoFecha     = view.findViewById(R.id.tv_info_fecha);
-        tvTotalPubs     = view.findViewById(R.id.tv_total_pubs);
-        tvAvatarInitial = view.findViewById(R.id.tv_avatar_initial);
-        ivAvatar        = view.findViewById(R.id.iv_avatar);
-        progressBar     = view.findViewById(R.id.progressBar);
-
-        view.setAlpha(0f);
-        view.animate().alpha(1f).setDuration(400)
-                .setInterpolator(new DecelerateInterpolator()).start();
+        sesion                  = new SessionManager(requireContext());
+        tvNombreUsuario         = view.findViewById(R.id.tv_username);
+        tvEmail                 = view.findViewById(R.id.tv_email);
+        tvInfoUsername          = view.findViewById(R.id.tv_info_username);
+        tvInfoEmail             = view.findViewById(R.id.tv_info_email);
+        tvInfoFecha             = view.findViewById(R.id.tv_info_fecha);
+        tvTotalPublicaciones    = view.findViewById(R.id.tv_total_pubs);
+        tvLetraAvatar           = view.findViewById(R.id.tv_avatar_initial);
+        imagenAvatar            = view.findViewById(R.id.iv_avatar);
+        barraProgreso           = view.findViewById(R.id.progressBar);
     }
-
 
     @Override
     public void onResume() {
         super.onResume();
-        actualizarDatosLocales();
-        cargarPerfil();
-        cargarPublicaciones();
+        // Cada vez que se muestra el fragmento actualizamos los datos
+        mostrarDatosLocales();
+        cargarDatosDelServidor();
+        cargarNumeroPublicaciones();
     }
 
-    private void actualizarDatosLocales() {
-        String username = session.getUsername();
-        String email    = session.getEmail();
-        if (tvUsername != null) tvUsername.setText("@" + username);
-        if (tvEmail != null) tvEmail.setText(email);
-        if (tvInfoUsername != null) tvInfoUsername.setText(username);
-        if (tvInfoEmail != null) tvInfoEmail.setText(email);
+    // Muestra los datos que tenemos guardados en SharedPreferences
+    private void mostrarDatosLocales() {
+        String username = sesion.getUsername();
+        String email    = sesion.getEmail();
 
-        if (!username.isEmpty() && tvAvatarInitial != null) {
-            tvAvatarInitial.setText(String.valueOf(username.charAt(0)).toUpperCase());
-            tvAvatarInitial.setVisibility(View.VISIBLE);
-            if (ivAvatar != null) ivAvatar.setVisibility(View.GONE);
+        if (tvNombreUsuario != null) {
+            tvNombreUsuario.setText("@" + username);
+        }
+            tvEmail.setText(email);
+        }
+            tvInfoUsername.setText(username);
+        }
+            tvInfoEmail.setText(email);
+        }
+
+        // Mostramos la primera letra como avatar
+        if ( {
+            !username.isEmpty() {
+        }
+            && tvLetraAvatar != null) {
+        }
+            tvLetraAvatar.setText(String.valueOf(username.charAt(0)).toUpperCase());
+            tvLetraAvatar.setVisibility(View.VISIBLE);
+            if (imagenAvatar != null) {
+                imagenAvatar.setVisibility(View.GONE);
+            }
         }
     }
 
-    private void cargarPerfil() {
-        int id = session.getUserId();
-        if (id < 0 || progressBar == null) return;
+    // Carga los datos actualizados del usuario desde la API
+    private void cargarDatosDelServidor() {
+        int idUsuario = sesion.getUserId();
+        if (idUsuario < 0) {
+            return; // Sin sesion, no hacemos nada
+        }
 
-        progressBar.setVisibility(View.VISIBLE);
+        if (barraProgreso != null) {
+            barraProgreso.setVisibility(View.VISIBLE);
+        }
 
-        ApiClient.getService().getUsuario(id).enqueue(new Callback<UsuarioResponse>() {
+        ApiClient.getService().getUsuarioPorId(idUsuario).enqueue(new Callback<UsuarioResponse>() {
             @Override
             public void onResponse(Call<UsuarioResponse> call, Response<UsuarioResponse> response) {
-                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                if (barraProgreso != null) {
+                    barraProgreso.setVisibility(View.GONE);
+                }
 
-                if (response.isSuccessful() && response.body() != null) {
-                    Usuario u = response.body().getUsuario();
+                if ( {
+                    response.isSuccessful() {
+                }
+                    && response.body() != null) {
+                }
+                    Usuario usuario = response.body().getUsuario();
 
-                    if (u != null && tvUsername != null) {
-                        tvUsername.setText("@" + u.username);
-                        tvEmail.setText(u.email);
-                        tvInfoUsername.setText(u.username);
-                        tvInfoEmail.setText(u.email);
+                    if (usuario != null && tvNombreUsuario != null) {
+                        // Actualizamos la vista con los datos frescos del servidor
+                        tvNombreUsuario.setText("@" + usuario.username);
+                        tvEmail.setText(usuario.email);
+                        tvInfoUsername.setText(usuario.username);
+                        tvInfoEmail.setText(usuario.email);
 
+                        // Actualizamos tambien la sesion local
+                        sesion.guardarSesion(idUsuario, usuario.username, usuario.email);
 
-                        session.saveSession(id, u.username, u.email);
-
-                        if (u.fechaRegistro != null && u.fechaRegistro.length() >= 10) {
-                            tvInfoFecha.setText(u.fechaRegistro.substring(0, 10));
+                        // Mostramos la fecha de registro (solo los primeros 10 caracteres = YYYY-MM-DD)
+                        if ( {
+                            usuario.fechaRegistro != null && usuario.fechaRegistro.length() {
+                        }
+                            >= 10) {
+                        }
+                            tvInfoFecha.setText(usuario.fechaRegistro.substring(0, 10));
                         }
                     }
                 }
@@ -111,30 +142,46 @@ public class PerfilFragment extends Fragment {
 
             @Override
             public void onFailure(Call<UsuarioResponse> call, Throwable t) {
-                if (progressBar != null) progressBar.setVisibility(View.GONE);
+                if (barraProgreso != null) {
+                    barraProgreso.setVisibility(View.GONE);
+                }
+                // Si falla dejamos los datos locales
             }
         });
     }
 
-    private void cargarPublicaciones() {
-        int id = session.getUserId();
-        if (id < 0) return;
+    // Cuenta cuantas publicaciones tiene el usuario
+    private void cargarNumeroPublicaciones() {
+        int idUsuario = sesion.getUserId();
+        if (idUsuario < 0) {
+            return;
+        }
 
-        ApiClient.getService().getFotosUsuario(id).enqueue(new Callback<FotosResponse>() {
+        ApiClient.getService().getFotosDeUsuario(idUsuario).enqueue(new Callback<FotosResponse>() {
             @Override
             public void onResponse(Call<FotosResponse> call, Response<FotosResponse> response) {
-                if (response.isSuccessful() && response.body() != null
-                        && response.body().fotos != null && tvTotalPubs != null) {
+                if ( {
+                    response.isSuccessful() {
+                }
+                    && response.body() != null
+                }
+                        && response.body().fotos != null && tvTotalPublicaciones != null) {
 
-                    long count = response.body().fotos.stream()
-                            .filter(p -> "publicacion".equals(p.tipoFoto))
-                            .count();
-                    tvTotalPubs.setText(String.valueOf(count));
+                    // Contamos solo las publicaciones, no las fotos de perfil
+                    int contador = 0;
+                    for (Post post : response.body().fotos) {
+                        if ("publicacion".equals(post.tipoFoto)) {
+                            contador++;
+                        }
+                    }
+                    tvTotalPublicaciones.setText(String.valueOf(contador));
                 }
             }
 
             @Override
-            public void onFailure(Call<FotosResponse> call, Throwable t) { }
+            public void onFailure(Call<FotosResponse> call, Throwable t) {
+                // Si falla no mostramos nada
+            }
         });
     }
 }

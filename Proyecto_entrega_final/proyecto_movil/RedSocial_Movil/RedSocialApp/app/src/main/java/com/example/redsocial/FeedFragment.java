@@ -25,15 +25,19 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// Fragmento del feed: muestra todas las publicaciones y permite crear nuevas
 public class FeedFragment extends Fragment {
 
-    private RecyclerView recycler;
-    private ProgressBar progressBar;
-    private EditText etPublicar;
+    private RecyclerView listaPublicaciones;
+    private ProgressBar barraProgreso;
+    private EditText campoTextoPublicar;
     private TextView btnPublicar;
-    private final List<Post> posts = new ArrayList<>();
-    private PostAdapter adapter;
-    private SessionManager session;
+
+    // Lista donde guardamos los posts y el adaptador del RecyclerView
+    private List<Post> listaPosts = new ArrayList<>();
+    private PostAdapter adaptador;
+
+    private SessionManager sesion;
 
     @Nullable
     @Override
@@ -47,63 +51,76 @@ public class FeedFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        session     = new SessionManager(requireContext());
-        recycler    = view.findViewById(R.id.recycler);
-        progressBar = view.findViewById(R.id.progressBar);
-        etPublicar  = view.findViewById(R.id.et_publicar);
-        btnPublicar = view.findViewById(R.id.btn_publicar);
+        sesion               = new SessionManager(requireContext());
+        listaPublicaciones   = view.findViewById(R.id.recycler);
+        barraProgreso        = view.findViewById(R.id.progressBar);
+        campoTextoPublicar   = view.findViewById(R.id.et_publicar);
+        btnPublicar          = view.findViewById(R.id.btn_publicar);
 
-        recycler.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new PostAdapter(posts, requireContext());
-        recycler.setAdapter(adapter);
+        // Configuramos el RecyclerView con layout vertical
+        listaPublicaciones.setLayoutManager(new LinearLayoutManager(getContext()));
+        adaptador = new PostAdapter(listaPosts, requireContext());
+        listaPublicaciones.setAdapter(adaptador);
 
-        btnPublicar.setOnClickListener(v -> {
-            String texto = etPublicar.getText().toString().trim();
-            if (TextUtils.isEmpty(texto)) {
-                Toast.makeText(getContext(), "Escribe algo primero 💬", Toast.LENGTH_SHORT).show();
-                return;
+        // Listener del boton publicar
+        btnPublicar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String texto = campoTextoPublicar.getText().toString().trim();
+                if (TextUtils.isEmpty(texto)) {
+                    Toast.makeText(getContext(), "Escribe algo antes de publicar", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                publicarTexto(texto);
             }
-            publicar(texto);
         });
 
-        loadPosts();
+        cargarPublicaciones();
     }
-
 
     @Override
     public void onResume() {
         super.onResume();
-        loadPosts();
+        // Recargamos cada vez que volvemos al fragmento
+        cargarPublicaciones();
     }
 
-    private void loadPosts() {
-        progressBar.setVisibility(View.VISIBLE);
+    // Carga todas las publicaciones desde la API
+    private void cargarPublicaciones() {
+        barraProgreso.setVisibility(View.VISIBLE);
 
         ApiClient.getService().getFotos().enqueue(new Callback<FotosResponse>() {
             @Override
             public void onResponse(Call<FotosResponse> call, Response<FotosResponse> response) {
-                if (!isAdded()) return;
-                progressBar.setVisibility(View.GONE);
+                if (!isAdded()) {
+                    return; // Comprobamos que el fragmento sigue activo
+                }
 
-                if (response.isSuccessful() && response.body() != null
+                barraProgreso.setVisibility(View.GONE);
+
+                if ( {
+                    response.isSuccessful() {
+                }
+                    && response.body() != null
+                }
                         && response.body().fotos != null) {
-                    posts.clear();
-                    for (Post p : response.body().fotos) {
-                        if (!"perfil".equals(p.tipoFoto)) {
-                            posts.add(p);
+
+                    listaPosts.clear();
+
+                    // Solo mostramos las publicaciones, no las fotos de perfil
+                    for (Post post : response.body().fotos) {
+                        if (!"perfil".equals(post.tipoFoto)) {
+                            listaPosts.add(post);
                         }
                     }
-                    adapter.notifyDataSetChanged();
 
-                    if (posts.isEmpty()) {
-                        Toast.makeText(getContext(),
-                                "Sé el primero en publicar algo 🌸",
-                                Toast.LENGTH_SHORT).show();
+                    adaptador.notifyDataSetChanged();
+
+                    if (listaPosts.isEmpty()) {
+                        Toast.makeText(getContext(), "No hay publicaciones todavia", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Toast.makeText(getContext(),
-                            "Error cargando publicaciones: " + response.code(),
-                            Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error al cargar publicaciones", Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -112,40 +129,39 @@ public class FeedFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
-                progressBar.setVisibility(View.GONE);
-                Toast.makeText(getContext(), "Sin conexión al servidor", Toast.LENGTH_SHORT).show();
+                barraProgreso.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "Sin conexion al servidor", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void publicar(String texto) {
+    // Crea una nueva publicacion de texto en la API
+    private void publicarTexto(String texto) {
         btnPublicar.setEnabled(false);
-        btnPublicar.setAlpha(0.6f);
 
-        Map<String, String> body = new HashMap<>();
-        body.put("id_usuario", String.valueOf(session.getUserId()));
-        body.put("url_foto",   "sin_imagen");
-        body.put("descripcion", texto);
-        body.put("tipo_foto",  "publicacion");
+        // Creamos el mapa con los datos de la publicacion
+        Map<String, String> datos = new HashMap<>();
+        datos.put("id_usuario", String.valueOf(sesion.getUserId()));
+        datos.put("url_foto", "sin_imagen"); // No hay imagen, solo texto
+        datos.put("descripcion", texto);
+        datos.put("tipo_foto", "publicacion");
 
-        ApiClient.getService().createFoto(body).enqueue(new Callback<ApiResponse>() {
+        ApiClient.getService().crearFoto(datos).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
                 if (!isAdded()) {
                     return;
                 }
+
                 btnPublicar.setEnabled(true);
-                btnPublicar.setAlpha(1f);
 
                 if (response.isSuccessful()) {
-                    etPublicar.setText("");
-                    Toast.makeText(getContext(), "Publicado", Toast.LENGTH_SHORT).show();
-
-                    loadPosts();
+                    // Limpiamos el campo y recargamos el feed
+                    campoTextoPublicar.setText("");
+                    Toast.makeText(getContext(), "Publicado correctamente", Toast.LENGTH_SHORT).show();
+                    cargarPublicaciones();
                 } else {
-                    Toast.makeText(getContext(),
-                            "Error al publicar (" + response.code() + ")",
-                            Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Error al publicar: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
             }
 
@@ -155,10 +171,8 @@ public class FeedFragment extends Fragment {
                     return;
                 }
                 btnPublicar.setEnabled(true);
-                btnPublicar.setAlpha(1f);
-                Toast.makeText(getContext(), "Sin conexión al servidor", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Sin conexion al servidor", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 }

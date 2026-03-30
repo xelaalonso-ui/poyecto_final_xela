@@ -10,74 +10,82 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
+// Interface con todos los endpoints de la API
+// Retrofit se encarga de hacer las peticiones HTTP automaticamente
 public interface ApiService {
 
+    // --- AUTENTICACION ---
     @POST("login")
-    Call<LoginResponse> login(@Body Map<String, String> body);
+    Call<LoginResponse> login(@Body Map<String, String> datos);
 
+    // --- USUARIOS ---
     @POST("usuarios")
-    Call<RegisterResponse> register(@Body Map<String, String> body);
+    Call<RegisterResponse> registrarUsuario(@Body Map<String, String> datos);
 
     @GET("usuarios")
-    Call<UsuariosListResponse> getUsuarios();
+    Call<UsuariosListResponse> getTodosUsuarios();
 
     @GET("usuarios/{id}")
-    Call<UsuarioResponse> getUsuario(@Path("id") int id);
+    Call<UsuarioResponse> getUsuarioPorId(@Path("id") int id);
 
     @PUT("usuarios/{id}")
-    Call<ApiResponse> updateUsuario(@Path("id") int id, @Body Map<String, String> body);
+    Call<ApiResponse> actualizarUsuario(@Path("id") int id, @Body Map<String, String> datos);
 
     @DELETE("usuarios/{id}")
-    Call<ApiResponse> deleteUsuario(@Path("id") int id);
+    Call<ApiResponse> eliminarUsuario(@Path("id") int id);
 
+    // --- DATOS PERSONALES ---
     @GET("datos_personales/{id}")
     Call<DatosPersonalesResponse> getDatosPersonales(@Path("id") int id);
 
     @POST("datos_personales")
-    Call<ApiResponse> saveDatosPersonales(@Body Map<String, String> body);
+    Call<ApiResponse> guardarDatosPersonales(@Body Map<String, String> datos);
 
     @PUT("datos_personales/{id}")
-    Call<ApiResponse> updateDatosPersonales(@Path("id") int id, @Body Map<String, String> body);
+    Call<ApiResponse> actualizarDatosPersonales(@Path("id") int id, @Body Map<String, String> datos);
 
+    // --- FOTOS / PUBLICACIONES ---
     @GET("fotos")
     Call<FotosResponse> getFotos();
 
     @GET("fotos/{id}")
-    Call<FotoResponse> getFoto(@Path("id") int id);
+    Call<FotoResponse> getFotoPorId(@Path("id") int id);
 
     @GET("fotos/usuario/{id}")
-    Call<FotosResponse> getFotosUsuario(@Path("id") int idUsuario);
+    Call<FotosResponse> getFotosDeUsuario(@Path("id") int idUsuario);
 
     @POST("fotos")
-    Call<ApiResponse> createFoto(@Body Map<String, String> body);
+    Call<ApiResponse> crearFoto(@Body Map<String, String> datos);
 
     @PUT("fotos/{id}")
-    Call<ApiResponse> updateFoto(@Path("id") int id, @Body Map<String, String> body);
+    Call<ApiResponse> actualizarFoto(@Path("id") int id, @Body Map<String, String> datos);
 
     @DELETE("fotos/{id}")
-    Call<ApiResponse> deleteFoto(@Path("id") int id);
+    Call<ApiResponse> eliminarFoto(@Path("id") int id);
 
+    // --- COMENTARIOS ---
     @GET("comentarios/foto/{id}")
-    Call<ComentariosResponse> getComentarios(@Path("id") int idFoto);
+    Call<ComentariosResponse> getComentariosDeFoto(@Path("id") int idFoto);
 
     @GET("comentarios/{id}")
-    Call<ComentarioResponse> getComentario(@Path("id") int id);
+    Call<ComentarioResponse> getComentarioPorId(@Path("id") int id);
 
     @POST("comentarios")
-    Call<ApiResponse> createComentario(@Body Map<String, String> body);
+    Call<ApiResponse> crearComentario(@Body Map<String, String> datos);
 
     @PUT("comentarios/{id}")
-    Call<ApiResponse> updateComentario(@Path("id") int id, @Body Map<String, String> body);
+    Call<ApiResponse> actualizarComentario(@Path("id") int id, @Body Map<String, String> datos);
 
     @DELETE("comentarios/{id}")
-    Call<ApiResponse> deleteComentario(@Path("id") int id);
+    Call<ApiResponse> eliminarComentario(@Path("id") int id);
 
+    // --- ACTIVIDAD ---
     @GET("actividad/{id}")
-    Call<ActividadResponse> getActividad(@Path("id") int idUsuario);
+    Call<ActividadResponse> getActividadDeUsuario(@Path("id") int idUsuario);
 
     @POST("actividad")
-    Call<ApiResponse> createActividad(@Body Map<String, String> body);
+    Call<ApiResponse> registrarActividad(@Body Map<String, String> datos);
 
     @DELETE("actividad/{id}")
-    Call<ApiResponse> deleteActividad(@Path("id") int id);
+    Call<ApiResponse> eliminarActividad(@Path("id") int id);
 }

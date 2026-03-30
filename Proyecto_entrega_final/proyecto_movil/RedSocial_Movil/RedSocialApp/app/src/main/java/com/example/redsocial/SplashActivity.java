@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+// Pantalla de inicio (splash) que se muestra al abrir la app
+// Dura 2 segundos y luego redirige al login o al main segun si ya hay sesion
 public class SplashActivity extends AppCompatActivity {
 
     @Override
@@ -19,34 +21,41 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        TextView tvTitle = findViewById(R.id.tv_title);
+        TextView tvTitulo = findViewById(R.id.tv_title);
 
-        // Animación de entrada: fade + scale
-        tvTitle.setAlpha(0f);
-        tvTitle.setScaleX(0.7f);
-        tvTitle.setScaleY(0.7f);
+        // Animacion de entrada: el titulo aparece con fade y escala
+        tvTitulo.setAlpha(0f);
+        tvTitulo.setScaleX(0.7f);
+        tvTitulo.setScaleY(0.7f);
 
-        AnimatorSet set = new AnimatorSet();
-        set.playTogether(
-            ObjectAnimator.ofFloat(tvTitle, View.ALPHA, 0f, 1f),
-            ObjectAnimator.ofFloat(tvTitle, View.SCALE_X, 0.7f, 1f),
-            ObjectAnimator.ofFloat(tvTitle, View.SCALE_Y, 0.7f, 1f)
+        AnimatorSet animacion = new AnimatorSet();
+        animacion.playTogether(
+            ObjectAnimator.ofFloat(tvTitulo, View.ALPHA, 0f, 1f),
+            ObjectAnimator.ofFloat(tvTitulo, View.SCALE_X, 0.7f, 1f),
+            ObjectAnimator.ofFloat(tvTitulo, View.SCALE_Y, 0.7f, 1f)
         );
-        set.setDuration(700);
-        set.setInterpolator(new DecelerateInterpolator());
-        set.start();
+        animacion.setDuration(700);
+        animacion.setInterpolator(new DecelerateInterpolator());
+        animacion.start();
 
+        // Esperamos 2 segundos y luego navegamos
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                SessionManager sesion = new SessionManager(SplashActivity.this);
 
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            SessionManager session = new SessionManager(this);
-            Class<?> destino = session.isLoggedIn()
-                    ? MainActivity.class
-                    : LoginActivity.class;
+                Intent intent;
+                // Si ya esta logueado vamos al main, si no al login
+                if (sesion.isLoggedIn()) {
+                    intent = new Intent(SplashActivity.this, MainActivity.class);
+                } else {
+                    intent = new Intent(SplashActivity.this, LoginActivity.class);
+                }
 
-            Intent intent = new Intent(this, destino);
-            startActivity(intent);
-            overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-            finish();
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                finish(); // Cerramos el splash para que no vuelva al pulsar atras
+            }
         }, 2000);
     }
 }

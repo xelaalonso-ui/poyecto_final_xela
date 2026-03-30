@@ -2,6 +2,7 @@ package com.example.redsocial;
 
 import com.google.gson.annotations.SerializedName;
 
+// Modelo de usuario de la red social
 public class Usuario {
 
     @SerializedName("id_usuario")
@@ -19,11 +20,10 @@ public class Usuario {
     @SerializedName("fecha_registro")
     public String fechaRegistro;
 
-    // Para login: la API devuelve {mensaje, usuario:{...}}
+    // Campos extra que puede devolver el login
     @SerializedName("mensaje")
     public String mensaje;
 
-    // Anidado para login response
     @SerializedName("usuario")
     public Usuario usuario;
 }

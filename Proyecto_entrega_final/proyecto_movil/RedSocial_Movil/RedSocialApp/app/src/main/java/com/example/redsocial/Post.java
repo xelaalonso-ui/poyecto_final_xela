@@ -2,6 +2,7 @@ package com.example.redsocial;
 
 import com.google.gson.annotations.SerializedName;
 
+// Modelo que representa una publicacion (foto) de la red social
 public class Post {
 
     @SerializedName("id_foto")
@@ -19,10 +20,11 @@ public class Post {
     @SerializedName("fecha_subida")
     public String fechaSubida;
 
+    // Puede ser "publicacion" o "perfil"
     @SerializedName("tipo_foto")
     public String tipoFoto;
 
-    // De JOIN con Usuario
+    // Estos campos vienen del JOIN con la tabla usuarios
     @SerializedName("username")
     public String username;
 

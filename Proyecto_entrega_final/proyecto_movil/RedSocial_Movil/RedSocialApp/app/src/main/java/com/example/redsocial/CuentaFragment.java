@@ -1,12 +1,10 @@
 package com.example.redsocial;
 
-import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,10 +12,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+// Fragmento de la cuenta del usuario
+// Muestra informacion basica y botones de editar y cerrar sesion
 public class CuentaFragment extends Fragment {
 
-    private SessionManager session;
-    private TextView tvUsername, tvEmail, tvAvatar;
+    private SessionManager sesion;
+    private TextView tvNombreUsuario, tvEmail, tvAvatar;
 
     @Nullable
     @Override
@@ -30,63 +30,71 @@ public class CuentaFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        session    = new SessionManager(requireContext());
-        tvUsername = view.findViewById(R.id.tv_username);
-        tvEmail    = view.findViewById(R.id.tv_email);
-        tvAvatar   = view.findViewById(R.id.tv_avatar);
+        sesion          = new SessionManager(requireContext());
+        tvNombreUsuario = view.findViewById(R.id.tv_username);
+        tvEmail         = view.findViewById(R.id.tv_email);
+        tvAvatar        = view.findViewById(R.id.tv_avatar);
 
-        actualizarUI();
+        // Mostramos los datos actuales del usuario
+        actualizarVista();
 
-        view.setAlpha(0f);
-        view.animate().alpha(1f).setDuration(400)
-                .setInterpolator(new DecelerateInterpolator()).start();
-
-        // Botón editar cuenta
-        view.findViewById(R.id.btn_editar).setOnClickListener(v -> {
-            animateClick(v);
-            Intent intent = new Intent(requireContext(), EditarCuentaActivity.class);
-            startActivityForResult(intent, 100);
-            requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        // Boton para ir a la pantalla de editar cuenta
+        view.findViewById(R.id.btn_editar).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(requireContext(), EditarCuentaActivity.class);
+                startActivityForResult(intent, 100);
+                requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }
         });
 
-        // Botón logout
-        view.findViewById(R.id.btn_logout).setOnClickListener(v -> {
-            animateClick(v);
-            new AlertDialog.Builder(requireContext())
-                    .setTitle("🚪 Cerrar sesión")
-                    .setMessage("¿Seguro que quieres salir?")
-                    .setPositiveButton("Sí, salir", (dialog, which) -> {
-                        session.logout();
-                        Intent intent = new Intent(requireContext(), LoginActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        requireActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                    })
-                    .setNegativeButton("Cancelar", null)
-                    .show();
+        // Boton para cerrar sesion con dialogo de confirmacion
+        view.findViewById(R.id.btn_logout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mostrarDialogoCerrarSesion();
+            }
         });
     }
 
+    // Se llama cuando volvemos de EditarCuentaActivity
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // Si volvemos de editar con resultado OK actualizamos la vista
         if (requestCode == 100 && resultCode == -1) {
-            actualizarUI();
+            actualizarVista();
         }
     }
 
-    private void actualizarUI() {
-        String username = session.getUsername();
-        String email    = session.getEmail();
-        tvUsername.setText("@" + username);
+    // Muestra los datos del usuario en la pantalla
+    private void actualizarVista() {
+        String nombreUsuario = sesion.getUsername();
+        String email         = sesion.getEmail();
+
+        tvNombreUsuario.setText("@" + nombreUsuario);
         tvEmail.setText(email);
-        if (!username.isEmpty()) {
-            tvAvatar.setText(String.valueOf(username.charAt(0)).toUpperCase());
+
+        // Ponemos la primera letra del nombre como avatar
+        if (!nombreUsuario.isEmpty()) {
+            tvAvatar.setText(String.valueOf(nombreUsuario.charAt(0)).toUpperCase());
         }
     }
 
-    private void animateClick(View v) {
-        ObjectAnimator.ofFloat(v, View.SCALE_X, 1f, 0.95f, 1f).setDuration(200).start();
-        ObjectAnimator.ofFloat(v, View.SCALE_Y, 1f, 0.95f, 1f).setDuration(200).start();
+    // Dialogo para confirmar el cierre de sesion
+    private void mostrarDialogoCerrarSesion() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Cerrar sesion")
+                .setMessage("¿Estas seguro de que quieres salir?")
+                .setPositiveButton("Si, salir", (dialog, which) -> {
+                    // Cerramos sesion y volvemos al login
+                    sesion.cerrarSesion();
+                    Intent intent = new Intent(requireContext(), LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    requireActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
     }
 }

@@ -1,6 +1,5 @@
 package com.example.redsocial;
 
-import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -21,166 +20,199 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// Activity para editar los datos de la cuenta
+// Permite cambiar username, email y contraseña, o eliminar la cuenta
 public class EditarCuentaActivity extends AppCompatActivity {
 
-    private EditText etUsername, etEmail, etPassword;
+    private EditText campoUsername, campoEmail, campoPassword;
     private TextView btnGuardar, btnEliminar, tvError;
-    private ProgressBar progressBar;
-    private SessionManager session;
+    private ProgressBar barraProgreso;
+    private SessionManager sesion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editar_cuenta);
 
-        session      = new SessionManager(this);
-        etUsername   = findViewById(R.id.et_username);
-        etEmail      = findViewById(R.id.et_email);
-        etPassword   = findViewById(R.id.et_password);
-        btnGuardar   = findViewById(R.id.btn_guardar);
-        btnEliminar  = findViewById(R.id.btn_eliminar);
-        tvError      = findViewById(R.id.tv_error);
-        progressBar  = findViewById(R.id.progressBar);
+        sesion        = new SessionManager(this);
+        campoUsername = findViewById(R.id.et_username);
+        campoEmail    = findViewById(R.id.et_email);
+        campoPassword = findViewById(R.id.et_password);
+        btnGuardar    = findViewById(R.id.btn_guardar);
+        btnEliminar   = findViewById(R.id.btn_eliminar);
+        tvError       = findViewById(R.id.tv_error);
+        barraProgreso = findViewById(R.id.progressBar);
 
-        // Rellenar con datos actuales como placeholder
-        etUsername.setHint("Actual: " + session.getUsername());
-        etEmail.setHint("Actual: " + session.getEmail());
+        // Mostramos como placeholder los datos actuales
+        campoUsername.setHint("Actual: " + sesion.getUsername());
+        campoEmail.setHint("Actual: " + sesion.getEmail());
 
+        // Boton para volver atras sin guardar
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
 
-        btnGuardar.setOnClickListener(v -> {
-            animateClick(v);
-            guardarCambios();
+        // Boton guardar cambios
+        btnGuardar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                guardarCambios();
+            }
         });
 
-        btnEliminar.setOnClickListener(v -> {
-            animateClick(v);
-            confirmarEliminar();
+        // Boton eliminar cuenta
+        btnEliminar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pedirConfirmacionEliminar();
+            }
         });
     }
 
+    // Valida y guarda los cambios del perfil
     private void guardarCambios() {
-        String username = etUsername.getText().toString().trim();
-        String email    = etEmail.getText().toString().trim();
-        String password = etPassword.getText().toString().trim();
+        String nuevoUsername = campoUsername.getText().toString().trim();
+        String nuevoEmail    = campoEmail.getText().toString().trim();
+        String nuevoPassword = campoPassword.getText().toString().trim();
 
-        // Validar que al menos un campo esté relleno
-        if (username.isEmpty() && email.isEmpty() && password.isEmpty()) {
-            showError("Rellena al menos un campo para actualizar");
+        // Hay que rellenar al menos un campo
+        if ( {
+            nuevoUsername.isEmpty() {
+        }
+            && nuevoEmail.isEmpty() && nuevoPassword.isEmpty()) {
+        }
+            mostrarError("Rellena al menos un campo para poder actualizar");
             return;
         }
 
-        // Validar email si se proporcionó
-        if (!email.isEmpty() && !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            showError("El email no es válido");
+        // Validamos el email si lo han cambiado
+        if ( {
+            !nuevoEmail.isEmpty() {
+        }
+            && !Patterns.EMAIL_ADDRESS.matcher(nuevoEmail).matches()) {
+        }
+            mostrarError("El email introducido no es valido");
             return;
         }
 
-        // Validar password si se proporcionó
-        if (!password.isEmpty() && password.length() < 6) {
-            showError("La contraseña debe tener al menos 6 caracteres");
+        // Validamos la contrasena si la han cambiado
+        if ( {
+            !nuevoPassword.isEmpty() {
+        }
+            && nuevoPassword.length() < 6) {
+        }
+            mostrarError("La contrasena debe tener minimo 6 caracteres");
             return;
         }
 
-        showLoading(true);
-        hideError();
+        mostrarCargando(true);
+        ocultarError();
 
-        Map<String, String> body = new HashMap<>();
-        if (!username.isEmpty()) body.put("username", username);
-        if (!email.isEmpty())    body.put("email", email);
-        if (!password.isEmpty()) body.put("password", password);
+        // Solo mandamos los campos que se han rellenado
+        Map<String, String> datos = new HashMap<>();
+        if (!nuevoUsername.isEmpty()) {
+            datos.put("username", nuevoUsername);
+        }
+        if (!nuevoEmail.isEmpty()) {
+            datos.put("email", nuevoEmail);
+        }
+        if (!nuevoPassword.isEmpty()) {
+            datos.put("password", nuevoPassword);
+        }
 
-        int idUsuario = session.getUserId();
+        int idUsuario = sesion.getUserId();
 
-        ApiClient.getService().updateUsuario(idUsuario, body).enqueue(new Callback<ApiResponse>() {
+        ApiClient.getService().actualizarUsuario(idUsuario, datos).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                showLoading(false);
+                mostrarCargando(false);
 
                 if (response.isSuccessful()) {
-                    // Actualizar sesión local con los nuevos datos
-                    String newUsername = username.isEmpty() ? session.getUsername() : username;
-                    String newEmail    = email.isEmpty()    ? session.getEmail()    : email;
-                    session.saveSession(idUsuario, newUsername, newEmail);
+                    // Actualizamos los datos de sesion locales
+                    String usernameActualizado = nuevoUsername.isEmpty() ? sesion.getUsername() : nuevoUsername;
+                    String emailActualizado    = nuevoEmail.isEmpty()    ? sesion.getEmail()    : nuevoEmail;
+                    sesion.guardarSesion(idUsuario, usernameActualizado, emailActualizado);
 
                     Toast.makeText(EditarCuentaActivity.this,
-                            " Cuenta actualizada correctamente", Toast.LENGTH_LONG).show();
+                            "Cuenta actualizada correctamente", Toast.LENGTH_LONG).show();
                     setResult(RESULT_OK);
                     finish();
                 } else {
-                    String msg = "Error al actualizar (" + response.code() + ")";
-                    if (response.code() == 409) msg = "Ese usuario o email ya está en uso";
-                    showError(msg);
+                    String mensajeError = "Error al actualizar: " + response.code();
+                    if ( {
+                        response.code() {
+                    }
+                        == 409) {
+                    }
+                        mensajeError = "Ese nombre de usuario o email ya esta en uso";
+                    }
+                    mostrarError(mensajeError);
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable t) {
-                showLoading(false);
-                showError("Sin conexión con el servidor");
+                mostrarCargando(false);
+                mostrarError("Sin conexion con el servidor");
             }
         });
     }
 
-    private void confirmarEliminar() {
+    // Muestra un dialogo pidiendo confirmacion para eliminar la cuenta
+    private void pedirConfirmacionEliminar() {
         new AlertDialog.Builder(this)
-                .setTitle("⚠️ Eliminar cuenta")
-                .setMessage("¿Estás seguro? Esta acción es irreversible y perderás todos tus datos.")
-                .setPositiveButton("Sí, eliminar", (dialog, which) -> eliminarCuenta())
+                .setTitle("Eliminar cuenta")
+                .setMessage("Esta accion es irreversible. Se borraran todos tus datos y publicaciones. ¿Estas seguro?")
+                .setPositiveButton("Si, eliminar", (dialog, which) -> eliminarCuenta())
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
 
+    // Elimina la cuenta del servidor y cierra sesion
     private void eliminarCuenta() {
-        showLoading(true);
-        hideError();
+        mostrarCargando(true);
 
-        int idUsuario = session.getUserId();
+        int idUsuario = sesion.getUserId();
 
-        ApiClient.getService().deleteUsuario(idUsuario).enqueue(new Callback<ApiResponse>() {
+        ApiClient.getService().eliminarUsuario(idUsuario).enqueue(new Callback<ApiResponse>() {
             @Override
             public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
-                showLoading(false);
+                mostrarCargando(false);
 
                 if (response.isSuccessful()) {
-                    session.logout();
+                    // Cerramos la sesion local y volvemos al login
+                    sesion.cerrarSesion();
                     Toast.makeText(EditarCuentaActivity.this,
                             "Cuenta eliminada", Toast.LENGTH_LONG).show();
+
                     Intent intent = new Intent(EditarCuentaActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                     overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 } else {
-                    showError("Error al eliminar cuenta (" + response.code() + ")");
+                    mostrarError("Error al eliminar la cuenta: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<ApiResponse> call, Throwable t) {
-                showLoading(false);
-                showError("Sin conexión con el servidor");
+                mostrarCargando(false);
+                mostrarError("Sin conexion con el servidor");
             }
         });
     }
 
-    private void animateClick(View v) {
-        ObjectAnimator.ofFloat(v, View.SCALE_X, 1f, 0.95f, 1f).setDuration(200).start();
-        ObjectAnimator.ofFloat(v, View.SCALE_Y, 1f, 0.95f, 1f).setDuration(200).start();
+    private void mostrarCargando(boolean cargando) {
+        barraProgreso.setVisibility(cargando ? View.VISIBLE : View.GONE);
+        btnGuardar.setEnabled(!cargando);
+        btnEliminar.setEnabled(!cargando);
+        btnGuardar.setAlpha(cargando ? 0.6f : 1f);
     }
 
-    private void showLoading(boolean show) {
-        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        btnGuardar.setEnabled(!show);
-        btnEliminar.setEnabled(!show);
-        btnGuardar.setAlpha(show ? 0.6f : 1f);
-    }
-
-    private void showError(String msg) {
-        tvError.setText(msg);
+    private void mostrarError(String mensaje) {
+        tvError.setText(mensaje);
         tvError.setVisibility(View.VISIBLE);
     }
 
-    private void hideError() {
+    private void ocultarError() {
         tvError.setVisibility(View.GONE);
     }
 }

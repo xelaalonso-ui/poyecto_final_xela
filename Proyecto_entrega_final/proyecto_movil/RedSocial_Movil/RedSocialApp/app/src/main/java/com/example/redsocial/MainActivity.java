@@ -8,6 +8,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+// Activity principal con la barra de navegacion inferior
+// Contiene tres fragmentos: Feed, Perfil y Cuenta
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -15,39 +17,43 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView nav = findViewById(R.id.bottom_nav);
+        BottomNavigationView navegacion = findViewById(R.id.bottom_nav);
 
-
+        // Cargamos el feed por defecto al abrir la app
         if (savedInstanceState == null) {
-            loadFragment(new FeedFragment(), false);
+            cargarFragmento(new FeedFragment(), false);
         }
 
-        nav.setOnItemSelectedListener(item -> {
-            Fragment fragment;
-            int id = item.getItemId();
+        // Cuando el usuario pulsa en la barra de navegacion
+        navegacion.setOnItemSelectedListener(item -> {
+            Fragment fragmentoSeleccionado;
+            int idItem = item.getItemId();
 
-            if (id == R.id.nav_feed) {
-                fragment = new FeedFragment();
-            } else if (id == R.id.nav_perfil) {
-                fragment = new PerfilFragment();
+            if (idItem == R.id.nav_feed) {
+                fragmentoSeleccionado = new FeedFragment();
+            } else if (idItem == R.id.nav_perfil) {
+                fragmentoSeleccionado = new PerfilFragment();
             } else {
-                fragment = new CuentaFragment();
+                // El tercer item es la cuenta
+                fragmentoSeleccionado = new CuentaFragment();
             }
 
-            loadFragment(fragment, true);
+            cargarFragmento(fragmentoSeleccionado, true);
             return true;
         });
     }
 
-    private void loadFragment(Fragment fragment, boolean animate) {
-        FragmentTransaction tx = getSupportFragmentManager()
+    // Metodo auxiliar para mostrar un fragmento en el contenedor
+    private void cargarFragmento(Fragment fragmento, boolean conAnimacion) {
+        FragmentTransaction transaccion = getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.container, fragment);
+                .replace(R.id.container, fragmento);
 
-        if (animate) {
-            tx.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
+        // Solo animamos si no es la carga inicial
+        if (conAnimacion) {
+            transaccion.setCustomAnimations(R.anim.fade_in, R.anim.fade_out);
         }
 
-        tx.commit();
+        transaccion.commit();
     }
 }

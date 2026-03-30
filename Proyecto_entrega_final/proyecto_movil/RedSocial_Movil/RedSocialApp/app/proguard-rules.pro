@@ -1,3 +1,0 @@
--keep class com.example.redsocial.model.** { *; }
--keepattributes Signature
--keepattributes *Annotation*
