@@ -1,0 +1,9 @@
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\bin\Debug\An.gif
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\bin\Debug\gato1.gif
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\bin\Debug\RedSocial.exe.config
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\bin\Debug\RedSocial.exe
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\bin\Debug\RedSocial.pdb
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\obj\Debug\RedSocial.csproj.AssemblyReference.cache
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\obj\Debug\RedSocial.csproj.CoreCompileInputs.cache
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\obj\Debug\RedSocial.exe
+C:\Users\USUARIO\Downloads\RedSocialFW9_actualizado\fw9_out\obj\Debug\RedSocial.pdb
