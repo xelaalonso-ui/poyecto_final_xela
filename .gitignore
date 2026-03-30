@@ -1,0 +1,19 @@
+# Android / Java
+*.apk
+*.ap_
+*.dex
+*.class
+*.jar
+*.iml
+*.log
+
+# Carpetas temporales / build
+build/
+.gradle/
+.idea/
+local.properties
+captures/
+.externalNativeBuild/
+
+# Archivos del sistema
+.DS_Store

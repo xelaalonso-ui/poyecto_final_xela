@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mi Red Social 🌸</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="register">Registrarse</string>
+    <string name="username">Usuario</string>
+    <string name="email">Correo electrónico</string>
+    <string name="password">Contraseña</string>
+    <string name="no_account">¿No tienes cuenta? Regístrate</string>
+    <string name="have_account">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="feed">Inicio</string>
+    <string name="perfil">Perfil</string>
+    <string name="cuenta">Cuenta</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="publish">Publicar</string>
+    <string name="what_thinking">¿Qué estás pensando?</string>
+    <string name="loading">Cargando…</string>
+    <string name="error_empty_fields">Por favor completa todos los campos</string>
+    <string name="error_login">Usuario o contraseña incorrectos</string>
+    <string name="success_register">¡Cuenta creada correctamente!</string>
+    <string name="like">Me gusta</string>
+    <string name="comment">Comentar</string>
+    <string name="edit_profile">Editar perfil</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="descripcion_app">Tu espacio para compartir y desahogarte 💜</string>
+</resources>
